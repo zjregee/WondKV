@@ -1,8 +1,2 @@
-pub struct DBFile {
-    id: u32,
-     
-}
-
-impl DBFile {
-
-}
+pub mod entry;
+pub mod db_file;

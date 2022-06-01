@@ -1,2 +1,3 @@
-mod str_util;
-mod file_util;
+pub mod crc32;
+pub mod str_util;
+pub mod file_util;

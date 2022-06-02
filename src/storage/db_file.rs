@@ -48,7 +48,7 @@ impl DBFile {
             return None;
         }
         entry.meta.value = value.unwrap();
-        offset += entry.meta.extra_size;
+        offset += entry.meta.value_size;
         let extra = self.read_buf(offset, entry.meta.extra_size);
         if extra.is_none() {
             return None;
@@ -67,7 +67,13 @@ impl DBFile {
         if self.file.is_none() {
             return None;
         }
+        if offset as u64 >= self.file.as_ref().unwrap().metadata().unwrap().len() {
+            return None;
+        }
         let mut buf = Vec::with_capacity(len as usize);
+        for _ in 0..len {
+            buf.push(0);
+        }
         let ret = self.file.as_ref().unwrap().read_at(&mut buf, offset as u64);
         if ret.is_err() {
             return None;

@@ -27,7 +27,7 @@ impl Entry {
         state = state | (t << 8);
         state = state | mark;
         Entry {
-            valid: false,
+            valid: true,
             crc32: 0,
             time_stamp: time::time_now(),
             state,
@@ -47,7 +47,7 @@ impl Entry {
         state = state | (t << 8);
         state = state | mark;
         Entry {
-            valid: false,
+            valid: true,
             crc32: 0,
             time_stamp: time::time_now(),
             state,
@@ -67,7 +67,7 @@ impl Entry {
         state = state | (t << 8);
         state = state | mark;
         Entry {
-            valid: false,
+            valid: true,
             crc32: 0,
             time_stamp: deadline,
             state,
@@ -86,13 +86,13 @@ impl Entry {
         if buf.len() < ENTRY_HEADER_SIZE as usize {
             panic!();
         }
-        let ks = buf[7] as u32 | (buf[6] as u32) << 8 | (buf[5] as u32) << 16 + (buf[4] as u32) << 24;
-        let vs = buf[11] as u32 | (buf[10] as u32) << 8 | (buf[9] as u32) << 16 + (buf[8] as u32) << 24;
-        let es = buf[15] as u32 | (buf[14] as u32) << 8 | (buf[13] as u32) << 16 + (buf[12] as u32) << 24;
-        let state = buf[17] as u16 | (buf[16] as u16) << 8;
-        let time_stamp = buf[25] as u64 | (buf[24] as u64) << 8 | (buf[23] as u64) << 16 + (buf[22] as u64) << 24
-                            + (buf[21] as u64) << 32 | (buf[20] as u64) << 40 | (buf[19] as u64) << 48 + (buf[18] as u64) << 56;
-        let crc = buf[3] as u32 | (buf[2] as u32) << 8 | (buf[1] as u32) << 16 + (buf[0] as u32) << 24;
+        let ks = buf[7] as u32 | ((buf[6] as u32) << 8) | ((buf[5] as u32) << 16) | ((buf[4] as u32) << 24);
+        let vs = buf[11] as u32 | ((buf[10] as u32) << 8) | ((buf[9] as u32) << 16) | ((buf[8] as u32) << 24);
+        let es = buf[15] as u32 | ((buf[14] as u32) << 8) | ((buf[13] as u32) << 16) | ((buf[12] as u32) << 24);
+        let state = buf[17] as u16 | ((buf[16] as u16) << 8);
+        let time_stamp = buf[25] as u64 | ((buf[24] as u64) << 8) | ((buf[23] as u64) << 16) | ((buf[22] as u64) << 24)
+                            | ((buf[21] as u64) << 32) | ((buf[20] as u64) << 40) | ((buf[19] as u64) << 48 | (buf[18] as u64) << 56);
+        let crc = buf[3] as u32 | ((buf[2] as u32) << 8) | ((buf[1] as u32) << 16) | ((buf[0] as u32) << 24);
         Entry {
             valid: false,
             crc32: crc,
@@ -123,6 +123,9 @@ impl Entry {
         let state = self.state;
         let time_stamp = self.time_stamp;
         let mut buf = Vec::<u8>::with_capacity(ENTRY_HEADER_SIZE as usize);
+        for _ in 0..ENTRY_HEADER_SIZE {
+            buf.push(0);
+        }
         buf[4] = (ks >> 24) as u8;
         buf[5] = (ks >> 16) as u8;
         buf[6] = (ks >> 8) as u8;
@@ -149,7 +152,7 @@ impl Entry {
         buf.extend_from_slice(&self.meta.value);
         buf.extend_from_slice(&self.meta.extra);
         let crc = crc32::Crc::<u32>::new(&crc32::CRC_32_ISCSI);
-        let check_sum = crc.checksum(&buf);
+        let check_sum = crc.checksum(&self.meta.value);
         buf[0] = (check_sum >> 24) as u8;
         buf[1] = (check_sum >> 16) as u8;
         buf[2] = (check_sum >> 8) as u8;
@@ -162,6 +165,6 @@ impl Entry {
     }
 
     pub fn get_mark(&self) -> u16 {
-        self.state & (2<<7 - 1)
+        self.state & ((2<<7) - 1)
     }
 }

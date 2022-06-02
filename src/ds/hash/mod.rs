@@ -104,10 +104,11 @@ impl Hash {
         res
     }
 
-    pub fn hclear(&mut self, key: String) {
+    pub fn hclear(&mut self, key: String) -> bool {
         if !self.record.contains_key(&key) {
-            return;
+            return false;
         }
         self.record.remove(&key);
+        true
     }
 }

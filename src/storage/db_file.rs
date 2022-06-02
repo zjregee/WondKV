@@ -97,7 +97,7 @@ impl DBFile {
 
     pub fn close(&mut self, sync: bool) -> bool {
         if self.file.is_none() {
-            return false;
+            return true;
         }
         let mut ret = true;
         if sync {
@@ -109,7 +109,7 @@ impl DBFile {
 
     pub fn sync(&mut self) -> bool {
         if self.file.is_none() {
-            return false;
+            return true;
         }
         let ret = self.file.as_ref().unwrap().sync_all();
         ret.is_ok()
@@ -135,12 +135,12 @@ pub fn build(path: String) -> Option<(HashMap<u32, DBFile>, u32)> {
     if all_id.len() > 0 {
         all_id.sort();
         active_id = *all_id.last().unwrap();
-        for id in all_id {
-            let file = DBFile::new(path.clone(), id);
+        for index in 0..all_id.len() - 1 {
+            let file = DBFile::new(path.clone(), all_id[index]);
             if file.is_none() {
                 return None;
             }
-            arch_files.insert(id, file.unwrap());
+            arch_files.insert(all_id[index], file.unwrap());
         }
     }
     Some((arch_files, active_id))

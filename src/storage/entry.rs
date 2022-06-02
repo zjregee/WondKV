@@ -3,6 +3,7 @@ use crate::utils::crc32;
 
 pub const ENTRY_HEADER_SIZE: u32 = 26;
 
+#[derive(Clone)]
 pub struct Meta {
     pub key: Vec<u8>,
     pub value: Vec<u8>,

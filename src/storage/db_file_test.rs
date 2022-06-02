@@ -2,7 +2,6 @@
 mod tests {
     use std::env;
     use std::fs::{self, File};
-    use std::os::unix::raw::off_t;
     use crate::storage::entry;
     use crate::storage::db_file;
 

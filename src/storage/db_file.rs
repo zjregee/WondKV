@@ -7,10 +7,10 @@ use crate::utils::crc32;
 use crate::storage::entry;
 
 pub struct DBFile {
-    id: u32,
-    path: String,
-    offset: u32,
-    file: Option<File>
+    pub id: u32,
+    pub path: String,
+    pub offset: u32,
+    pub file: Option<File>
 }
 
 impl DBFile {

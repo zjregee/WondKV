@@ -1,6 +1,9 @@
+use std::fs::File;
+use std::path::Path;
 use std::sync::Arc;
 use std::cell::RefCell;
 use std::collections::HashMap;
+use crate::config;
 use crate::idx;
 use crate::db_hash;
 use crate::storage::db_file;
@@ -8,6 +11,7 @@ use crate::utils::time;
 use crate::storage::entry;
 
 pub struct WondKV {
+    pub config: config::Config,
     pub active_file: Option<Arc<RefCell<db_file::DBFile>>>,
     pub arch_files: HashMap<u32, Arc<RefCell<db_file::DBFile>>>,
     pub hash_index: db_hash::HashIdx,
@@ -16,8 +20,19 @@ pub struct WondKV {
 }
 
 impl WondKV {
-    pub fn close(&mut self) {
-        
+    pub fn close(&mut self) -> bool {
+        let ret = self.active_file.as_ref().unwrap().borrow_mut().close(true);
+        if !ret {
+            return false;
+        }
+        for file in self.arch_files.values() {
+            let ret = file.borrow_mut().close(false);
+            if !ret {
+                return false;
+            }
+        }
+        self.closed = 1;
+        true
     }
 
     pub fn is_closed(&self) -> bool {
@@ -37,8 +52,41 @@ impl WondKV {
         self.build_hash_index(entry);
     }
 
-    pub fn store(&self, entry: entry::Entry) -> bool {
-
+    pub fn store(&mut self, entry: entry::Entry) -> bool {
+        if self.active_file.is_none() {
+            let file_path = Path::new(&self.config.dir_path).join(format!("{}.data.hash", 1));
+            let ret = File::create(file_path);
+            if ret.is_err() {
+                return false;
+            }
+            let new_file = db_file::DBFile::new(self.config.dir_path.clone(), 1);
+            if new_file.is_none() {
+                return false;
+            }
+            self.active_file = Some(Arc::new(RefCell::new(new_file.unwrap())));
+        }
+        if self.active_file.as_ref().unwrap().borrow().offset > self.config.max_file_size {
+            let ret = self.active_file.as_ref().unwrap().borrow_mut().sync();
+            if !ret {
+                return false;
+            }
+            let new_file_id = self.active_file.as_ref().unwrap().borrow().id + 1;
+            let file_path = Path::new(&self.config.dir_path).join(format!("{}.data.hash", new_file_id));
+            let ret = File::create(file_path);
+            if ret.is_err() {
+                return false;
+            }
+            let new_file = db_file::DBFile::new(self.config.dir_path.clone(), new_file_id);
+            if new_file.is_none() {
+                return false;
+            }
+            self.arch_files.insert(new_file_id - 1, self.active_file.as_ref().unwrap().clone());
+            self.active_file = Some(Arc::new(RefCell::new(new_file.unwrap())));
+        }
+        let ret = self.active_file.as_ref().unwrap().borrow_mut().write(entry);
+        if !ret {
+            return false;
+        }
         true
     }
 

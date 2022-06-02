@@ -1,5 +1,3 @@
-mod hash_test;
-
 use std::collections::HashMap;
 
 pub struct Hash {

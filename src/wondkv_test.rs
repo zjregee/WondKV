@@ -2,12 +2,7 @@
 mod tests {
     use std::env;
     use std::fs::{self, File};
-    use crate::idx;
     use crate::config;
-    use crate::wondkv;
-    use crate::db_hash;
-    use crate::storage::entry;
-    use crate::storage::db_file;
 
     fn test_init() {
         let current_path = env::current_dir().ok().unwrap();
@@ -34,9 +29,10 @@ mod tests {
         let ret = config.open();
         assert_eq!(ret.is_none(), false);
         let mut db = ret.unwrap();
+        db.hset(vec![1, 2, 3, 4], vec![4, 5], vec![6, 7, 8, 9]);
+        db.hset(vec![3, 4], vec![4, 5], vec![6, 7, 8, 9]);
         assert_eq!(db.hget(vec![1, 2, 3, 4], vec![4, 5]).unwrap(), vec![6, 7, 8, 9]);
         assert_eq!(db.hget(vec![3, 4], vec![4, 5]).unwrap(), vec![6, 7, 8, 9]);
-        assert_eq!(db.hget(vec![2, 3, 4], vec![4, 5]).unwrap(), vec![6, 7, 8, 9]);
         test_drop()
     }
 }

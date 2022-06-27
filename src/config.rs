@@ -1,13 +1,17 @@
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::sync::Arc;
+use std::env;
+use std::fs;
 use crate::db_hash;
 use crate::wondkv::WondKV;
 use crate::storage::db_file;
 
 pub fn default_config() -> Config {
+    let current_path = env::current_dir().ok().unwrap();
+    let temp_dir = current_path.join("tmp");
     Config {
-        dir_path: "/tmp".to_string(),
+        dir_path: temp_dir.to_str().unwrap().to_string(),
         max_file_size: 16 * 1024 * 1024,
     }
 }
@@ -20,6 +24,7 @@ pub struct Config {
 
 impl Config {
     pub fn open(&self) -> Option<WondKV> {
+        fs::create_dir(self.dir_path.clone()).ok();
         let res = db_file::build(self.dir_path.clone());
         if res.is_none() {
             return None;

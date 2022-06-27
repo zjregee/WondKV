@@ -13,9 +13,7 @@ use axum::{
     Json,
     Extension,
 };
-use std::env;
 use std::net::SocketAddr;
-use std::fs::{self, File};
 use serde_json::{Value, json};
 
 use tokio::sync::mpsc;
@@ -41,10 +39,6 @@ impl Message {
 
 #[tokio::main]
 async fn main() {
-    // let current_path = env::current_dir().ok().unwrap();
-    // let temp_dir = current_path.join("tmp_wondkv_test");
-    // fs::create_dir(temp_dir.clone()).ok();
-    // File::create(temp_dir.join("1.data.hash")).ok();
     let (tx, mut rx) = mpsc::channel(32);
 
     let mut message = Message::new();
@@ -66,15 +60,13 @@ async fn main() {
             .unwrap();
     });
 
-    let mut config = config::default_config();
-    let current_path = env::current_dir().ok().unwrap();
-    let temp_dir = current_path.join("tmp_wondkv_test");
-    config.dir_path = temp_dir.to_str().unwrap().to_string();
+    let config = config::default_config();
     let ret = config.open();
     if ret.is_none() {
         panic!();
     }
     let mut db = ret.unwrap();
+
     while let Some(message) = rx.recv().await {
         match message.method {
             1 => {

@@ -57,6 +57,12 @@ impl SubMessage {
     }
 }
 
+#[derive(Clone)]
+struct SubEntry {
+    data: String,
+    expired: u64,
+}
+
 #[derive(Deserialize)]
 struct ReplyData {
     status: u8,
@@ -113,12 +119,21 @@ async fn main() {
                 .unwrap();
         });
 
-        let mut db: HashMap<String, String> = HashMap::new();
+        let mut db = utils::lru_cache::LRUCache::<SubEntry>::new(32);
         while let Some(message) = rx.recv().await {
             match message.method {
                 1 => {
-                    if db.contains_key(message.key.as_ref().unwrap()) {
-                        let _ = message.channel.unwrap().send(db.get(message.key.as_ref().unwrap()).unwrap().clone());
+                    let mut flag;
+                    flag = db.contains_key(message.key.as_ref().unwrap().clone());
+                    if flag {
+                        let expired = db.get(message.key.as_ref().unwrap().clone()).unwrap().clone().expired;
+                        if utils::time::time_now() > expired {
+                            flag = false;
+                            db.remove(message.key.as_ref().unwrap().clone());
+                        }
+                    }
+                    if flag {
+                        let _ = message.channel.unwrap().send(db.get(message.key.as_ref().unwrap().clone()).unwrap().clone().data);
                     } else {
                         let mut map = HashMap::new();
                         map.insert("key", message.key.clone().unwrap());
@@ -130,7 +145,8 @@ async fn main() {
                             .await.ok().unwrap();
                         let data = res.json::<ReplyData>().await.ok().unwrap();
                         if data.status == 0 {
-                            db.insert(message.key.unwrap(), data.data.clone());
+                            let time = utils::time::time_now() + 5;
+                            db.put(message.key.unwrap(), SubEntry{ data: data.data.clone(), expired: time });
                             let _ = message.channel.unwrap().send(data.data);
                         } else {
                             let _ = message.channel.unwrap().send("".to_string());
@@ -138,7 +154,8 @@ async fn main() {
                     }
                 }
                 2 => {
-                    db.insert(message.key.unwrap(), message.value.unwrap());
+                    let time = utils::time::time_now() + 5;
+                    db.put(message.key.unwrap(), SubEntry{ data: message.value.unwrap(), expired: time });
                 }
                 _ => ()
             }

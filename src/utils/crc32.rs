@@ -136,7 +136,7 @@ mod test {
     use super::*;
 
     #[test]
-    fn basics() {
+    fn test_crc() {
         let crc = Crc::<u32>::new(&CRC_32_ISCSI);
         assert_eq!(crc.checksum(b"123456789"), 0xe3069283);
         let mut digest = crc.digest();

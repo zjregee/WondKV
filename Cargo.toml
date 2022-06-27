@@ -7,3 +7,6 @@ edition = "2021"
 
 [dependencies]
 crc-catalog = "2.1.0"
+axum = "0.5.7"
+tokio = { version = "1.0", features = ["full"] }
+serde_json = "1.0.81"

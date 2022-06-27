@@ -3,8 +3,8 @@ mod tests {
     use crate::storage::entry;
 
     #[test]
-    fn basics() {
-        let mut entry = entry::Entry::new(vec![1, 2, 3], vec![3, 4], vec![1, 2], 0, 1);
+    fn test_entry() {
+        let entry = entry::Entry::new(vec![1, 2, 3], vec![3, 4], vec![1, 2], 0, 1);
         assert_eq!(entry.size(), 33);
         assert_eq!(entry.get_type(), 0);
         assert_eq!(entry.get_mark(), 1);
@@ -25,7 +25,6 @@ mod tests {
         assert_eq!(entry.get_mark(), 2);
         assert_eq!(entry.meta.key, vec![1, 2, 3]);
         assert_eq!(entry.meta.value, vec![1, 2]);
-        assert_eq!(entry.meta.extra, vec![]);
         let entry = entry::Entry::new_with_expire(vec![1, 2, 3], vec![1, 2], 1000, 0, 2);
         assert_eq!(entry.time_stamp, 1000);
     }

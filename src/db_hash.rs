@@ -4,6 +4,7 @@ use crate::idx;
 use crate::storage::entry;
 use crate::wondkv::WondKV;
 
+#[derive(Default)]
 pub struct HashIdx {
     pub indexes: hash::Hash,
     pub lock: Mutex<bool>,
@@ -31,7 +32,7 @@ impl WondKV {
             }
         }
         let _ = self.hash_index.lock.lock().unwrap();
-        let entry = entry::Entry::new(key.clone(), value.clone(), field.clone(), 0, idx::HashOperation::HashHSet.into());
+        let entry = entry::Entry::new(key.clone(), value.clone(), field.clone(), 0, idx::AHashOperation::HashHSet.into());
         let ret = self.store(entry);
         if !ret {
             return false;

@@ -10,6 +10,7 @@ use crate::storage::db_file;
 use crate::utils::time;
 use crate::storage::entry;
 
+#[derive(Default)]
 pub struct WondKV {
     pub config: config::Config,
     pub active_file: Option<Arc<RefCell<db_file::DBFile>>>,
@@ -95,7 +96,7 @@ impl WondKV {
             return false;
         }
         let mark = entry.get_mark();
-        if mark == idx::HashOperation::HashHExpire.into() {
+        if mark == 3 {
             if !self.expires.contains_key(&String::from_utf8(entry.meta.key.clone()).ok().unwrap()) {
                 return false;
             }
@@ -104,7 +105,7 @@ impl WondKV {
                 return false;
             }
         }
-        if mark == idx::HashOperation::HashHSet.into() {
+        if mark == 0 {
             let val = self.hget(entry.meta.key, entry.meta.extra);
             if val.is_none() {
                 return false;
@@ -122,7 +123,7 @@ impl WondKV {
         }
         let deadline = *self.expires.get(&String::from_utf8(key.clone()).ok().unwrap()).unwrap();
         if time::time_now() > deadline as u64 {
-            let entry = entry::Entry::new_no_extra(key.clone(), vec![], 0, idx::HashOperation::HashHClear.into());
+            let entry = entry::Entry::new_no_extra(key.clone(), vec![], 0, idx::AHashOperation::HashHClear.into());
             self.hash_index.indexes.hclear(String::from_utf8(key.clone()).ok().unwrap());
             self.store(entry);
             self.expires.remove(&String::from_utf8(key.clone()).ok().unwrap());

@@ -10,32 +10,31 @@ pub enum DataType {
     ZSet,
 }
 
-pub enum HashOperation {
+pub enum AHashOperation {
     HashHSet,
     HashHDel,
     HashHClear,
     HashHExpire,
 }
 
-impl Into<u16> for HashOperation {
+impl Into<u16> for AHashOperation {
     fn into(self) -> u16 {
         match self {
-            HashOperation::HashHSet => 0,
-            HashOperation::HashHDel => 1,
-            HashOperation::HashHClear => 2,
-            HashOperation::HashHExpire => 3,
-            
+            AHashOperation::HashHSet => 0,
+            AHashOperation::HashHDel => 1,
+            AHashOperation::HashHClear => 2,
+            AHashOperation::HashHExpire => 3,
         }
     }
 }
 
-impl From<u16> for HashOperation {
+impl From<u16> for AHashOperation {
     fn from(kind: u16) -> Self {
         match kind {
-            0 => HashOperation::HashHSet,
-            1 => HashOperation::HashHDel,
-            2 => HashOperation::HashHClear,
-            3 => HashOperation::HashHExpire,
+            0 => AHashOperation::HashHSet,
+            1 => AHashOperation::HashHDel,
+            2 => AHashOperation::HashHClear,
+            3 => AHashOperation::HashHExpire,
             _ => panic!(),
         }
     }
@@ -47,11 +46,11 @@ impl WondKV {
             return;
         }
         let key = String::from_utf8(entry.meta.key.clone()).ok().unwrap();
-        match HashOperation::from(entry.get_mark()) {
-            HashOperation::HashHSet => self.hash_index.indexes.hset(key, String::from_utf8(entry.meta.extra.clone()).ok().unwrap(), entry.meta.value),
-            HashOperation::HashHDel => self.hash_index.indexes.hdel(key, String::from_utf8(entry.meta.extra.clone()).ok().unwrap()),
-            HashOperation::HashHClear => self.hash_index.indexes.hclear(key),
-            HashOperation::HashHExpire => {
+        match AHashOperation::from(entry.get_mark()) {
+            AHashOperation::HashHSet => self.hash_index.indexes.hset(key, String::from_utf8(entry.meta.extra.clone()).ok().unwrap(), entry.meta.value),
+            AHashOperation::HashHDel => self.hash_index.indexes.hdel(key, String::from_utf8(entry.meta.extra.clone()).ok().unwrap()),
+            AHashOperation::HashHClear => self.hash_index.indexes.hclear(key),
+            AHashOperation::HashHExpire => {
                 if entry.time_stamp < time::time_now() {
                     self.hash_index.indexes.hclear(key);
                 } else {

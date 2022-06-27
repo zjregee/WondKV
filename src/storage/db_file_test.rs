@@ -6,7 +6,7 @@ mod tests {
     use crate::storage::db_file;
 
     #[test]
-    fn basics() {
+    fn test_db_file() {
         let current_path = env::current_dir().ok().unwrap();
         let temp_dir = current_path.join("tmp_db_file_test");
         fs::create_dir(temp_dir.clone()).ok();

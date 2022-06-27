@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+#[derive(Default)]
 pub struct Hash {
     record: HashMap<String, HashMap<String, Vec<u8>>>
 }

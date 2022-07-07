@@ -8,9 +8,9 @@ mod tests {
         let current_path = env::current_dir().ok().unwrap();
         let temp_dir = current_path.join("tmp_wondkv_test");
         fs::create_dir(temp_dir.clone()).ok();
-        File::create(temp_dir.join("1.data.hash")).ok();
-        File::create(temp_dir.join("2.data.hash")).ok();
-        File::create(temp_dir.join("3.data.hash")).ok();
+        File::create(temp_dir.join("1.data")).ok();
+        File::create(temp_dir.join("2.data")).ok();
+        File::create(temp_dir.join("3.data")).ok();
     }
 
     fn test_drop() {

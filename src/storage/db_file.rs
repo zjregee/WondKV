@@ -15,7 +15,7 @@ pub struct DBFile {
 
 impl DBFile {
     pub fn new(path: String, file_id: u32) -> Option<DBFile> {
-        let file_path = Path::new(&path).join(format!("{}.data.hash", file_id));
+        let file_path = Path::new(&path).join(format!("{}.data", file_id));
         let ret = OpenOptions::new().read(true).write(true).open(file_path);
         if ret.is_err() {
             return None;
@@ -131,7 +131,7 @@ pub fn build(path: String) -> Option<(HashMap<u32, DBFile>, u32)> {
     let mut all_id = vec![];
     for entry in dir {
         let file_name = entry.ok().unwrap().file_name().to_str().unwrap().to_string();
-        if file_name.contains(".data.hash") {
+        if file_name.contains(".data") {
             let id = file_name.split(".").next().unwrap().parse::<u32>().ok().unwrap();
             all_id.push(id);
         }

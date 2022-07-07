@@ -15,9 +15,9 @@ mod tests {
         assert_eq!(ret.is_some(), true);
         assert_eq!(ret.as_ref().unwrap().0.len(), 0);
         assert_eq!(ret.as_ref().unwrap().1, 0);
-        File::create(temp_dir.join("1.data.hash")).ok();
-        File::create(temp_dir.join("2.data.hash")).ok();
-        File::create(temp_dir.join("3.data.hash")).ok();
+        File::create(temp_dir.join("1.data")).ok();
+        File::create(temp_dir.join("2.data")).ok();
+        File::create(temp_dir.join("3.data")).ok();
         let ret = db_file::build(path.clone());
         assert_eq!(ret.is_some(), true);
         assert_eq!(ret.as_ref().unwrap().0.len(), 2);

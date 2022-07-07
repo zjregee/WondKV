@@ -55,7 +55,7 @@ impl WondKV {
 
     pub fn store(&mut self, entry: entry::Entry) -> bool {
         if self.active_file.is_none() {
-            let file_path = Path::new(&self.config.dir_path).join(format!("{}.data.hash", 1));
+            let file_path = Path::new(&self.config.dir_path).join(format!("{}.data", 1));
             let ret = File::create(file_path);
             if ret.is_err() {
                 return false;
@@ -72,7 +72,7 @@ impl WondKV {
                 return false;
             }
             let new_file_id = self.active_file.as_ref().unwrap().borrow().id + 1;
-            let file_path = Path::new(&self.config.dir_path).join(format!("{}.data.hash", new_file_id));
+            let file_path = Path::new(&self.config.dir_path).join(format!("{}.data", new_file_id));
             let ret = File::create(file_path);
             if ret.is_err() {
                 return false;
